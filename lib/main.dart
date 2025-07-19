@@ -14,10 +14,10 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-      title: 'Jogo da Forca',
+      title: '',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromRGBO(18, 109, 211, 230)),
       ),
         home: MyHomePage()
         ),
@@ -38,19 +38,52 @@ class MyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context){
     var appState = context.watch<MyAppState>();
+    var pair = appState.current;
 
     return Scaffold(
-      body: Column(
-        children: [
-          Text('A random idea: '),
-          Text(appState.current.asSnakeCase),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Text('Jogo da Forca'),
+            BigCard(pair: pair),
+            SizedBox(height: 10,),
+            ElevatedButton(onPressed: () {
+              appState.getNext();
+            },
+            child: Text('Next'),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}
 
-          ElevatedButton(onPressed: () {
-            appState.getNext();
-          },
-          child: Text('Next'),
-          )
-        ],
+class BigCard extends StatelessWidget {
+  const BigCard({
+    super.key,
+    required this.pair,
+  });
+
+  final WordPair pair;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final style = theme.textTheme.displayMedium!.copyWith(
+      color: theme.colorScheme.onPrimary,
+    );
+
+    return Card(
+      elevation: 20,
+      color: theme.colorScheme.primary,
+      child: Padding(
+        padding: const EdgeInsets.all(28.0),
+        child: Text(pair.asSnakeCase,
+         style: style,
+         semanticsLabel: "${pair.first} ${pair.second}",
+        ),
       ),
     );
   }
