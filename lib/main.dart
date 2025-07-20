@@ -14,29 +14,49 @@ class MyApp extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => MyAppState(),
       child: MaterialApp(
-      title: '',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color.fromRGBO(18, 109, 211, 230)),
-      ),
-        home: MyHomePage()
+        title: '',
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: const Color.fromRGBO(18, 109, 211, 230),
+          ),
         ),
-      );
+        home: MyHomePage(),
+      ),
+    );
   }
 }
 
 class MyAppState extends ChangeNotifier {
   var current = WordPair.random();
 
-  void getNext(){
+  void getNext() {
     current = WordPair.random();
     notifyListeners();
+  }
+
+  var favorites = <WordPair>[];
+  void toggleFavs() {
+    if (favorites.contains(current)) {
+      favorites.remove(current);
+      print('removed from favs');
+    } else {
+      favorites.add(current);
+      print('added to favs');
+    }
+    notifyListeners();
+  }
+
+  IconData get currentIcon {
+    return (favorites.contains(current)
+    ? Icons.favorite 
+    : Icons.favorite_outline);
   }
 }
 
 class MyHomePage extends StatelessWidget {
   @override
-  Widget build(BuildContext context){
+  Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     var pair = appState.current;
 
@@ -47,12 +67,25 @@ class MyHomePage extends StatelessWidget {
           children: [
             // Text('Jogo da Forca'),
             BigCard(pair: pair),
-            SizedBox(height: 10,),
-            ElevatedButton(onPressed: () {
-              appState.getNext();
-            },
-            child: Text('Next'),
-            )
+            SizedBox(height: 10),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    appState.toggleFavs();
+                  },
+                  icon: Icon(appState.currentIcon),
+                  label: Text('Fav'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    appState.getNext();
+                  },
+                  child: Text('Next'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -60,11 +93,9 @@ class MyHomePage extends StatelessWidget {
   }
 }
 
+//ANOT: ctrl + shift + space to see list of options inside widget
 class BigCard extends StatelessWidget {
-  const BigCard({
-    super.key,
-    required this.pair,
-  });
+  const BigCard({super.key, required this.pair});
 
   final WordPair pair;
 
@@ -80,9 +111,10 @@ class BigCard extends StatelessWidget {
       color: theme.colorScheme.primary,
       child: Padding(
         padding: const EdgeInsets.all(28.0),
-        child: Text(pair.asSnakeCase,
-         style: style,
-         semanticsLabel: "${pair.first} ${pair.second}",
+        child: Text(
+          pair.asSnakeCase,
+          style: style,
+          semanticsLabel: "${pair.first} ${pair.second}",
         ),
       ),
     );
